@@ -29,7 +29,7 @@ const METADATA_DOC = "metadata";
 const METADATA_COLLECTION = "metadata";
 const ALARMS_COLLECTION = "alarms";
 
-const audioOutput:any = new portAudio.AudioIO({
+const audioOutput:any = new( portAudio.AudioIO as any)({
     outOptions: {
         channelCount: 2,
         sampleFormat: portAudio.SampleFormat16Bit,
