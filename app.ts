@@ -2,6 +2,7 @@ import {initializeApp} from "firebase/app";
 import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
 import portAudio from "naudiodon"
+import * as fs from "fs";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -28,6 +29,16 @@ const METADATA_DOC = "metadata";
 const METADATA_COLLECTION = "metadata";
 const ALARMS_COLLECTION = "alarms";
 
+const audioOutput = new portAudio.AudioIO({
+    outOptions: {
+        channelCount: 2,
+        sampleFormat: portAudio.SampleFormat16Bit,
+        sampleRate: 48000,
+        deviceId: process.env.DEVICE_ID, // Use -1 or omit the deviceId to select the default device
+        closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
+    }
+} as any);
+
 function getAlarms() {
     // Fetch alarms from firestores
     const q = query(collection(db, ALARMS_COLLECTION));
@@ -51,14 +62,18 @@ function listenForRingStatus() {
         }
     });
 }
+function playSound(){
+    const rs = fs.createReadStream('../ringtone.wav');
+    rs.pipe(audioOutput as any);
+    audioOutput.start();
+}
 
 async function startRing() {
     await setDoc(doc(db, METADATA_COLLECTION, METADATA_DOC), {
         shouldRing: true
     } as DocumentData)
 
-    // TODO: Call sound lib
-
+    playSound()
     sendNotification();
 }
 
@@ -88,7 +103,8 @@ function onCron() {
 }
 
 function main() {
-    console.log(portAudio.getDevices());
+    playSound()
+
 
     getAlarms();
     listenForRingStatus();
