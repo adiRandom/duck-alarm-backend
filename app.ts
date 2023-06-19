@@ -1,6 +1,7 @@
 import {initializeApp} from "firebase/app";
 import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
+import portAudio from "naudiodon"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -87,6 +88,8 @@ function onCron() {
 }
 
 function main() {
+    console.log(portAudio.getDevices());
+
     getAlarms();
     listenForRingStatus();
     onCron();
