@@ -25,7 +25,7 @@ let state: State = {
     alarms: []
 }
 
-const deviceId = process.argv[2] || -1;
+const deviceId = process.argv[2] || "-1";
 const ringtonePath = process.argv[3] || "../ringtone.wav";
 
 const METADATA_DOC = "metadata";
@@ -37,7 +37,7 @@ const audioOutput:any = new( portAudio.AudioIO as any)({
         channelCount: 2,
         sampleFormat: portAudio.SampleFormat16Bit,
         sampleRate: 48000,
-        deviceId: deviceId, // Use -1 or omit the deviceId to select the default device
+        deviceId: parseInt(deviceId), // Use -1 or omit the deviceId to select the default device
         closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
     }
 } as any);
