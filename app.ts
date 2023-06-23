@@ -3,6 +3,7 @@ import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} 
 import firebaseConfig from "./firebase.json";
 import portAudio from "naudiodon"
 import * as fs from "fs";
+import events from "node:events";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -19,10 +20,12 @@ type Metadata = {
 
 type State = {
     alarms: Alarm[];
+    shouldRing: boolean;
 }
 
 let state: State = {
-    alarms: []
+    alarms: [],
+    shouldRing: false
 }
 
 const deviceId = process.argv[2] || "-1";
@@ -65,10 +68,19 @@ function listenForRingStatus() {
         }
     });
 }
-function playSound(){
-    const rs = fs.createReadStream(ringtonePath);
-    rs.pipe(audioOutput as any);
+
+async function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+async function playSound(){
     audioOutput.start();
+
+    const rs = fs.createReadStream(ringtonePath);
+    while(state.shouldRing){
+        rs.pipe(audioOutput as any);
+        await events.once(rs, 'end');
+        await delay(5000);
+    }
 }
 
 async function startRing() {
@@ -76,12 +88,15 @@ async function startRing() {
         shouldRing: true
     } as DocumentData)
 
+    state.shouldRing = true;
+
     playSound()
     sendNotification();
 }
 
 function stopRing() {
-    // TODO: Call sound lib
+    state.shouldRing = false;
+    audioOutput.stop();
 }
 
 function sendNotification() {
@@ -108,10 +123,14 @@ function onCron() {
 function main() {
     playSound()
 
-
     getAlarms();
     listenForRingStatus();
     onCron();
 }
 
 main()
+
+//TODO:
+// - Loop sound
+// - Stop sound
+// - Send notification
