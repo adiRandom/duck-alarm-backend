@@ -95,8 +95,10 @@ async function startRing() {
 }
 
 function stopRing() {
-    state.shouldRing = false;
-    audioOutput.stop();
+    // state.shouldRing = false;
+    // audioOutput.stop();
+    console.log(audioOutput)
+
 }
 
 function sendNotification() {
