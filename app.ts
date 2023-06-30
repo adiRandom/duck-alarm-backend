@@ -134,7 +134,7 @@ function onCron() {
 }
 
 function main() {
-    playSound()
+    playAndLoopSound()
 
     getAlarms();
     listenForRingStatus();
