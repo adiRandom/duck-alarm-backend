@@ -118,6 +118,7 @@ function stopRing() {
     try {
         // abort seems to not work properly. But it triggers and error and stops the sound
         audioOutput.abort();
+        audioOutput.abort(()=>console.log("Aborted"))
     }catch (e){
         // Do nothing
     }
