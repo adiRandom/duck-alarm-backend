@@ -36,15 +36,19 @@ const METADATA_DOC = "metadata";
 const METADATA_COLLECTION = "metadata";
 const ALARMS_COLLECTION = "alarms";
 
-const audioOutput: any = new (portAudio.AudioIO as any)({
-    outOptions: {
-        channelCount: 2,
-        sampleFormat: portAudio.SampleFormat16Bit,
-        sampleRate: 48000,
-        deviceId: parseInt(deviceId), // Use -1 or omit the deviceId to select the default device
-        closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
-    }
-} as any);
+function getAudioOutput() {
+    return new (portAudio.AudioIO as any)({
+        outOptions: {
+            channelCount: 2,
+            sampleFormat: portAudio.SampleFormat16Bit,
+            sampleRate: 48000,
+            deviceId: parseInt(deviceId), // Use -1 or omit the deviceId to select the default device
+            closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
+        }
+    } as any);
+}
+
+let audioOutput = getAudioOutput();
 
 function getAlarms() {
     // Fetch alarms from firestores
@@ -70,23 +74,25 @@ function listenForRingStatus() {
     });
 }
 
-function pipeAudio() {
-    console.log("Piping audio")
+function playSound() {
     const rs = fs.createReadStream(ringtonePath);
     rs.pipe(audioOutput as any);
 
+    audioOutput.start();
 }
 
-async function playSound() {
+
+
+async function playAndLoopSound() {
     const duration = await getAudioDurationInSeconds(ringtonePath)
     console.log(`Playing sound for ${duration} seconds`)
-
-    pipeAudio()
-    audioOutput.start();
+    playSound()
 
     // Loop the audio
     setInterval(() => {
-        pipeAudio()
+        audioOutput.quit();
+        audioOutput = getAudioOutput();
+        playSound()
     }, duration * 1000)
 }
 
@@ -97,13 +103,13 @@ async function startRing() {
 
     state.shouldRing = true;
 
-    playSound()
+    playAndLoopSound()
     sendNotification();
 }
 
 function stopRing() {
     state.shouldRing = false;
-    audioOutput.quit();
+    // audioOutput.quit();
 }
 
 function sendNotification() {
