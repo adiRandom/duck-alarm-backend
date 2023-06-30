@@ -36,6 +36,8 @@ const METADATA_DOC = "metadata";
 const METADATA_COLLECTION = "metadata";
 const ALARMS_COLLECTION = "alarms";
 
+let loopInterval: NodeJS.Timeout | null = null
+
 function getAudioOutput() {
     return new (portAudio.AudioIO as any)({
         outOptions: {
@@ -87,11 +89,17 @@ async function playAndLoopSound() {
     console.log(`Playing sound for ${duration} seconds`)
     playSound()
 
+    if (loopInterval) {
+        clearInterval(loopInterval)
+    }
+
     // Loop the audio
-    setInterval(() => {
-        audioOutput.quit();
-        audioOutput = getAudioOutput();
-        playSound()
+    loopInterval = setInterval(() => {
+        if (!state.shouldRing) {
+            audioOutput.quit();
+            audioOutput = getAudioOutput();
+            playSound()
+        }
     }, duration * 1000)
 }
 
@@ -109,6 +117,10 @@ async function startRing() {
 function stopRing() {
     state.shouldRing = false;
     audioOutput.quit();
+    if(loopInterval) {
+        clearInterval(loopInterval)
+        loopInterval = null
+    }
 }
 
 function sendNotification() {
@@ -136,6 +148,7 @@ function main() {
     playAndLoopSound()
     setTimeout(() => {
         stopRing()
+        console.log("Done")
     }, 3000)
 
     getAlarms();
