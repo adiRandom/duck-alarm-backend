@@ -76,11 +76,11 @@ async function playSound(){
     audioOutput.start();
 
     const rs = fs.createReadStream(ringtonePath);
-    while(state.shouldRing){
+    rs.pipe(audioOutput as any);
+
+    audioOutput.on('finish', () => {
         rs.pipe(audioOutput as any);
-        await events.once(rs, 'end');
-        await delay(5000);
-    }
+    })
 }
 
 async function startRing() {
@@ -95,10 +95,8 @@ async function startRing() {
 }
 
 function stopRing() {
-    // state.shouldRing = false;
-    // audioOutput.stop();
-    console.log(audioOutput)
-
+    state.shouldRing = false;
+    audioOutput.quit();
 }
 
 function sendNotification() {
