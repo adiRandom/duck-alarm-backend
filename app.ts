@@ -3,9 +3,7 @@ import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} 
 import firebaseConfig from "./firebase.json";
 import portAudio from "naudiodon"
 import * as fs from "fs";
-import events from "node:events";
-
-const getMP3Duration = require('get-mp3-duration')
+import {getAudioDurationInSeconds} from "get-audio-duration";
 
 
 const app = initializeApp(firebaseConfig);
@@ -78,16 +76,12 @@ function pipeAudio() {
 }
 
 async function playSound() {
-    audioOutput.start();
-
-    const buffer = fs.readFileSync(ringtonePath)
-    const duration = getMP3Duration(buffer)
-
+    const duration = await getAudioDurationInSeconds(ringtonePath)
     pipeAudio()
     // Loop the audio
     setInterval(() => {
         pipeAudio()
-    }, duration)
+    }, duration * 1000)
 }
 
 async function startRing() {
