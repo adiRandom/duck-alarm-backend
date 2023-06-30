@@ -1,7 +1,7 @@
 import {initializeApp} from "firebase/app";
 import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
-import playSound from 'play-sound'
+import playSoundLib from 'play-sound'
 import * as fs from "fs";
 import {getAudioDurationInSeconds} from "get-audio-duration";
 import {ChildProcess} from "child_process";
@@ -40,7 +40,7 @@ const ALARMS_COLLECTION = "alarms";
 let loopInterval: NodeJS.Timeout | null = null
 
 function getAudioOutput() {
-    return playSound({ })
+    return playSoundLib({ })
     // return new (portAudio.AudioIO as any)({
     //     outOptions: {
     //         channelCount: 2,
