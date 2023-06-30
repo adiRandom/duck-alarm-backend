@@ -79,6 +79,8 @@ async function playSound(){
     rs.pipe(audioOutput as any);
 
     audioOutput.on('finish', () => {
+        console.log("Finished playing sound")
+        const rs = fs.createReadStream(ringtonePath);
         rs.pipe(audioOutput as any);
     })
 }
