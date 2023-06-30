@@ -149,12 +149,6 @@ function onCron() {
 }
 
 function main() {
-    playAndLoopSound()
-    setTimeout(() => {
-        stopRing()
-        console.log("Done")
-    }, 3000)
-
     getAlarms();
     listenForRingStatus();
     onCron();
