@@ -1,9 +1,10 @@
 import {initializeApp} from "firebase/app";
 import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
-import portAudio from "naudiodon"
+import playSound from 'play-sound'
 import * as fs from "fs";
 import {getAudioDurationInSeconds} from "get-audio-duration";
+import {ChildProcess} from "child_process";
 
 
 const app = initializeApp(firebaseConfig);
@@ -39,18 +40,20 @@ const ALARMS_COLLECTION = "alarms";
 let loopInterval: NodeJS.Timeout | null = null
 
 function getAudioOutput() {
-    return new (portAudio.AudioIO as any)({
-        outOptions: {
-            channelCount: 2,
-            sampleFormat: portAudio.SampleFormat16Bit,
-            sampleRate: 48000,
-            deviceId: parseInt(deviceId), // Use -1 or omit the deviceId to select the default device
-            closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
-        }
-    } as any);
+    return playSound({ })
+    // return new (portAudio.AudioIO as any)({
+    //     outOptions: {
+    //         channelCount: 2,
+    //         sampleFormat: portAudio.SampleFormat16Bit,
+    //         sampleRate: 48000,
+    //         deviceId: parseInt(deviceId), // Use -1 or omit the deviceId to select the default device
+    //         closeOnError: true // Close the stream if an audio error is detected, if set false then just log the error
+    //     }
+    // } as any);
 }
 
 let audioOutput = getAudioOutput();
+let currentAudioPlayer: ChildProcess|null = null;
 
 function getAlarms() {
     // Fetch alarms from firestores
@@ -77,10 +80,11 @@ function listenForRingStatus() {
 }
 
 function playSound() {
-    const rs = fs.createReadStream(ringtonePath);
-    rs.pipe(audioOutput as any);
+    if (currentAudioPlayer) {
+        currentAudioPlayer.kill()
+    }
 
-    audioOutput.start();
+    currentAudioPlayer = audioOutput.play(ringtonePath)
 }
 
 
@@ -95,7 +99,7 @@ async function playAndLoopSound() {
 
     // Loop the audio
     loopInterval = setInterval(() => {
-        if (!state.shouldRing) {
+        if (state.shouldRing) {
             audioOutput = getAudioOutput();
             playSound()
         }
@@ -115,7 +119,7 @@ async function startRing() {
 
 function stopRing() {
     state.shouldRing = false;
-    audioOutput.abort();
+    currentAudioPlayer?.kill()
 
     if (loopInterval) {
         clearInterval(loopInterval)
