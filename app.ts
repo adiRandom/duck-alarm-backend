@@ -82,7 +82,6 @@ function playSound() {
 }
 
 
-
 async function playAndLoopSound() {
     const duration = await getAudioDurationInSeconds(ringtonePath)
     console.log(`Playing sound for ${duration} seconds`)
@@ -109,7 +108,7 @@ async function startRing() {
 
 function stopRing() {
     state.shouldRing = false;
-    // audioOutput.quit();
+    audioOutput.quit();
 }
 
 function sendNotification() {
@@ -135,6 +134,9 @@ function onCron() {
 
 function main() {
     playAndLoopSound()
+    setTimeout(() => {
+        stopRing()
+    }, 3000)
 
     getAlarms();
     listenForRingStatus();
@@ -144,6 +146,5 @@ function main() {
 main()
 
 //TODO:
-// - Loop sound
 // - Stop sound
 // - Send notification
