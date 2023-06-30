@@ -96,7 +96,6 @@ async function playAndLoopSound() {
     // Loop the audio
     loopInterval = setInterval(() => {
         if (!state.shouldRing) {
-            audioOutput.quit();
             audioOutput = getAudioOutput();
             playSound()
         }
@@ -116,7 +115,13 @@ async function startRing() {
 
 function stopRing() {
     state.shouldRing = false;
-    audioOutput.quit();
+    try {
+        // Quit seems to not work. But calling it twice triggers an error which stops the sound
+        audioOutput.quit();
+        audioOutput.quit();
+    }catch (e){
+        // Do nothing
+    }
     if(loopInterval) {
         clearInterval(loopInterval)
         loopInterval = null
