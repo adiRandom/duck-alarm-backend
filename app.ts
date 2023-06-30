@@ -116,9 +116,8 @@ async function startRing() {
 function stopRing() {
     state.shouldRing = false;
     try {
-        // Quit seems to not work. But calling it twice triggers an error which stops the sound
-        audioOutput.quit();
-        audioOutput.quit();
+        // abort seems to not work properly. But it triggers and error and stops the sound
+        audioOutput.abort();
     }catch (e){
         // Do nothing
     }
