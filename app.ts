@@ -5,6 +5,9 @@ import portAudio from "naudiodon"
 import * as fs from "fs";
 import events from "node:events";
 
+const getMP3Duration = require('get-mp3-duration')
+
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -35,7 +38,7 @@ const METADATA_DOC = "metadata";
 const METADATA_COLLECTION = "metadata";
 const ALARMS_COLLECTION = "alarms";
 
-const audioOutput:any = new( portAudio.AudioIO as any)({
+const audioOutput: any = new (portAudio.AudioIO as any)({
     outOptions: {
         channelCount: 2,
         sampleFormat: portAudio.SampleFormat16Bit,
@@ -69,20 +72,22 @@ function listenForRingStatus() {
     });
 }
 
-async function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
-}
-async function playSound(){
-    audioOutput.start();
-
+function pipeAudio() {
     const rs = fs.createReadStream(ringtonePath);
     rs.pipe(audioOutput as any);
+}
 
-    audioOutput.on('finish', () => {
-        console.log("Finished playing sound")
-        const rs = fs.createReadStream(ringtonePath);
-        rs.pipe(audioOutput as any);
-    })
+async function playSound() {
+    audioOutput.start();
+
+    const buffer = fs.readFileSync(ringtonePath)
+    const duration = getMP3Duration(buffer)
+
+    pipeAudio()
+    // Loop the audio
+    setInterval(() => {
+        pipeAudio()
+    }, duration)
 }
 
 async function startRing() {
