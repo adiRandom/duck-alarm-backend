@@ -157,5 +157,4 @@ function main() {
 main()
 
 //TODO:
-// - Stop sound
 // - Send notification
