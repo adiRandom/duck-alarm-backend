@@ -115,14 +115,9 @@ async function startRing() {
 
 function stopRing() {
     state.shouldRing = false;
-    try {
-        // abort seems to not work properly. But it triggers and error and stops the sound
-        audioOutput.abort();
-        audioOutput.abort(()=>console.log("Aborted"))
-    }catch (e){
-        // Do nothing
-    }
-    if(loopInterval) {
+    audioOutput.abort();
+
+    if (loopInterval) {
         clearInterval(loopInterval)
         loopInterval = null
     }
