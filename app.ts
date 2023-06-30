@@ -71,13 +71,19 @@ function listenForRingStatus() {
 }
 
 function pipeAudio() {
+    console.log("Piping audio")
     const rs = fs.createReadStream(ringtonePath);
     rs.pipe(audioOutput as any);
+
 }
 
 async function playSound() {
     const duration = await getAudioDurationInSeconds(ringtonePath)
+    console.log(`Playing sound for ${duration} seconds`)
+
     pipeAudio()
+    audioOutput.start();
+
     // Loop the audio
     setInterval(() => {
         pipeAudio()
