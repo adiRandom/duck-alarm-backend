@@ -2,7 +2,6 @@ import {initializeApp} from "firebase/app";
 import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
 import playSoundLib from 'play-sound'
-import * as fs from "fs";
 import {getAudioDurationInSeconds} from "get-audio-duration";
 import {ChildProcess} from "child_process";
 
@@ -40,7 +39,7 @@ const ALARMS_COLLECTION = "alarms";
 let loopInterval: NodeJS.Timeout | null = null
 
 function getAudioOutput() {
-    return playSoundLib({ })
+    return playSoundLib({})
     // return new (portAudio.AudioIO as any)({
     //     outOptions: {
     //         channelCount: 2,
@@ -53,7 +52,7 @@ function getAudioOutput() {
 }
 
 let audioOutput = getAudioOutput();
-let currentAudioPlayer: ChildProcess|null = null;
+let currentAudioPlayer: ChildProcess | null = null;
 
 function getAlarms() {
     // Fetch alarms from firestores
@@ -73,7 +72,12 @@ function listenForRingStatus() {
     const q = (doc(db, METADATA_COLLECTION, METADATA_DOC))
     onSnapshot(q, (querySnapshot) => {
         const document = querySnapshot.data() as Metadata;
-        if (!document.shouldRing) {
+        if (document.shouldRing) {
+            if (!state.shouldRing) {
+                // Not ringing yet
+                startRing();
+            }
+        } else {
             stopRing();
         }
     });
@@ -107,11 +111,11 @@ async function playAndLoopSound() {
 }
 
 async function startRing() {
+    state.shouldRing = true;
+
     await setDoc(doc(db, METADATA_COLLECTION, METADATA_DOC), {
         shouldRing: true
     } as DocumentData)
-
-    state.shouldRing = true;
 
     playAndLoopSound()
     sendNotification();
