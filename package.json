@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "firebase": "^9.22.2",
+    "firebase-admin": "^11.10.1",
     "get-audio-duration": "^4.0.1-beta.0",
     "get-mp3-duration": "^1.0.0",
     "naudiodon": "^2.3.6",

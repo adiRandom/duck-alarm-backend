@@ -4,12 +4,18 @@ import firebaseConfig from "./firebase.json";
 import playSoundLib from 'play-sound'
 import {getAudioDurationInSeconds} from "get-audio-duration";
 import {ChildProcess} from "child_process";
-import {getMessaging} from "firebase/messaging";
+import admin, {messaging} from "firebase-admin";
+import {Message} from "firebase-admin/messaging";
+import serviceAccount from "./serviceAccount.json";
 
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as any),
+
+});
 type Alarm = {
     hour: number;
     minute: number;
@@ -133,28 +139,43 @@ function stopRing() {
 }
 
 async function getFCMToken() {
-    const collection = collection(db, `metadata`)
-    const docData = await getDoc(doc(collection, `metadata`))
+    const colRef = collection(db, `metadata`)
+    const docData = await getDoc(doc(colRef, `metadata`))
     return docData.data()?.fcmToken
 }
 
 async function sendNotification() {
-    const message = {
+    const message: Message = {
+        apns: {
+            headers: {
+                "apns-priority": "10",
+            },
+            payload: {
+                "aps": {
+                    "alert" : {
+                        "title" : "Rise and Shine",
+                        "body" : "Time to wake up! Get up and move!"
+                    },
+                    contentAvailable: true,
+                    "sound": "default"
+                }
+            }
+        },
         data: {
             score: '850',
             time: '2:45'
         },
-        token: getFCMToken()
+        token: await getFCMToken()
     };
 
 // Send a message to the device corresponding to the provided
 // registration token.
-    (getMessaging() as any).send(message)
-        .then((response) => {
+    messaging().send(message)
+        .then((response: any) => {
             // Response is a message ID string.
             console.log('Successfully sent message:', response);
         })
-        .catch((error) => {
+        .catch((error: any) => {
             console.log('Error sending message:', error);
         });
 }
