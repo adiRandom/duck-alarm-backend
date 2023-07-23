@@ -1,9 +1,10 @@
 import {initializeApp} from "firebase/app";
-import {getFirestore, query, collection, onSnapshot, doc, setDoc, DocumentData} from "firebase/firestore";
+import {collection, doc, DocumentData, getDoc, getFirestore, onSnapshot, query, setDoc} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
 import playSoundLib from 'play-sound'
 import {getAudioDurationInSeconds} from "get-audio-duration";
 import {ChildProcess} from "child_process";
+import {getMessaging} from "firebase/messaging";
 
 
 const app = initializeApp(firebaseConfig);
@@ -131,8 +132,31 @@ function stopRing() {
     }
 }
 
-function sendNotification() {
-    // TODO: Impl
+async function getFCMToken() {
+    const collection = collection(db, `metadata`)
+    const docData = await getDoc(doc(collection, `metadata`))
+    return docData.data()?.fcmToken
+}
+
+async function sendNotification() {
+    const message = {
+        data: {
+            score: '850',
+            time: '2:45'
+        },
+        token: getFCMToken()
+    };
+
+// Send a message to the device corresponding to the provided
+// registration token.
+    (getMessaging() as any).send(message)
+        .then((response) => {
+            // Response is a message ID string.
+            console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+            console.log('Error sending message:', error);
+        });
 }
 
 
@@ -152,13 +176,13 @@ function onCron() {
     })
 }
 
+
 function main() {
-    getAlarms();
-    listenForRingStatus();
-    onCron();
+    sendNotification()
+    // getAlarms();
+    // listenForRingStatus();
+    // onCron();
 }
 
-main()
 
-//TODO:
-// - Send notification
+main()
