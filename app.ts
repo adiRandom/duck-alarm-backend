@@ -203,8 +203,8 @@ function onCron() {
             if (alarm.isEnable && isNow && isToday) {
                 startRing()
             }
-        }, 1000 * 60)
-    })
+        })
+    }, 1000 * 15)
 }
 
 function getDayOfWeek() {
