@@ -198,6 +198,7 @@ function onCron() {
 
         state.alarms.forEach(alarm => {
             console.log(alarm)
+            console.log(`Alarm time: ${getHourIn24Format(alarm.hour, alarm.isPm)}:${alarm.minute}`)
             const isNow = getHourIn24Format(alarm.hour, alarm.isPm) === nowHour && alarm.minute === nowMinute;
             const isToday = alarm.repeatingDays.length === 0 || alarm.repeatingDays.includes(getDayOfWeek());
             console.log(`isNow: ${isNow}, isToday: ${isToday} time: ${nowHour}:${nowMinute}`)
