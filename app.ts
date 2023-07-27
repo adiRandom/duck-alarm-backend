@@ -1,5 +1,5 @@
 import {initializeApp} from "firebase/app";
-import {collection, doc, DocumentData, getDoc, getFirestore, onSnapshot, query, setDoc} from "firebase/firestore";
+import {collection, doc, DocumentData, getDoc, getFirestore, onSnapshot, query, updateDoc} from "firebase/firestore";
 import firebaseConfig from "./firebase.json";
 import playSoundLib from 'play-sound'
 import {getAudioDurationInSeconds} from "get-audio-duration";
@@ -131,7 +131,7 @@ async function startRing() {
     console.log("Starting ring")
     state.shouldRing = true;
 
-    await setDoc(doc(db, METADATA_COLLECTION, METADATA_DOC), {
+    await updateDoc(doc(db, METADATA_COLLECTION, METADATA_DOC), {
         shouldRing: true
     } as DocumentData)
     console.log("Playing sound")
