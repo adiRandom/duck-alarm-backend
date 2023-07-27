@@ -148,16 +148,16 @@ async function sendNotification() {
     const message: Message = {
         apns: {
             headers: {
-                "apns-priority": "10",
+                "apns-priority": "5",
             },
             payload: {
                 "aps": {
-                    "alert" : {
-                        "title" : "Rise and Shine",
-                        "body" : "Time to wake up! Get up and move!"
+                    "alert": {
+                        "title": "Rise and Shine",
+                        "body": "Time to wake up! Get up and move!"
                     },
                     contentAvailable: true,
-                    "sound": "default"
+                    sound: "default"
                 }
             }
         },
@@ -199,10 +199,9 @@ function onCron() {
 
 
 function main() {
-    sendNotification()
-    // getAlarms();
-    // listenForRingStatus();
-    // onCron();
+    getAlarms();
+    listenForRingStatus();
+    onCron();
 }
 
 
