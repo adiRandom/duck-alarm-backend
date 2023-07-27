@@ -21,6 +21,7 @@ type Alarm = {
     minute: number;
     isEnable: boolean;
     repeatingDays: number[];
+    isPm: boolean;
 }
 
 type Metadata = {
@@ -197,7 +198,7 @@ function onCron() {
 
         state.alarms.forEach(alarm => {
             console.log(alarm)
-            const isNow = alarm.hour === nowHour && alarm.minute === nowMinute;
+            const isNow = getHourIn24Format(alarm.hour, alarm.isPm) === nowHour && alarm.minute === nowMinute;
             const isToday = alarm.repeatingDays.length === 0 || alarm.repeatingDays.includes(getDayOfWeek());
             console.log(`isNow: ${isNow}, isToday: ${isToday} time: ${nowHour}:${nowMinute}`)
             if (alarm.isEnable && isNow && isToday) {
@@ -209,6 +210,14 @@ function onCron() {
 
 function getDayOfWeek() {
     return new Date().getDay() + 6 % 7
+}
+
+function getHourIn24Format(hour: number, isPm: boolean) {
+    if (hour === 12) {
+        return isPm ? 12 : 0;
+    }
+
+    return isPm ? hour + 12 : hour;
 }
 
 
