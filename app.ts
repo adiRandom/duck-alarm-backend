@@ -20,6 +20,7 @@ type Alarm = {
     hour: number;
     minute: number;
     isEnable: boolean;
+    repeatingDays: number[];
 }
 
 type Metadata = {
@@ -67,9 +68,11 @@ function getAlarms() {
     onSnapshot(q, (querySnapshot) => {
         const alarmList: Alarm[] = [];
         querySnapshot.forEach((doc) => {
+            console.log("Alarm: ", doc.data())
             alarmList.push(doc.data() as Alarm);
         });
 
+        console.log("Alarms: ", alarmList)
         state.alarms = alarmList;
     });
 }
@@ -79,6 +82,8 @@ function listenForRingStatus() {
     const q = (doc(db, METADATA_COLLECTION, METADATA_DOC))
     onSnapshot(q, (querySnapshot) => {
         const document = querySnapshot.data() as Metadata;
+        console.log(`Should ring: ${document.shouldRing}`)
+        console.log(`Current state: ${state.shouldRing}`)
         if (document.shouldRing) {
             if (!state.shouldRing) {
                 // Not ringing yet
@@ -118,11 +123,13 @@ async function playAndLoopSound() {
 }
 
 async function startRing() {
+    console.log("Starting ring")
     state.shouldRing = true;
 
     await setDoc(doc(db, METADATA_COLLECTION, METADATA_DOC), {
         shouldRing: true
     } as DocumentData)
+    console.log("Playing sound")
 
     playAndLoopSound()
     sendNotification();
@@ -184,17 +191,25 @@ async function sendNotification() {
 function onCron() {
     // Check alarms every minute
     setInterval(() => {
+        console.log("Running cron")
         const now = new Date();
         const nowHour = now.getHours();
         const nowMinute = now.getMinutes();
 
         state.alarms.forEach(alarm => {
+            console.log(alarm)
             const isNow = alarm.hour === nowHour && alarm.minute === nowMinute;
-            if (alarm.isEnable && isNow) {
+            const isToday = alarm.repeatingDays.length === 0 || alarm.repeatingDays.includes(getDayOfWeek());
+            console.log(`isNow: ${isNow}, isToday: ${isToday} time: ${nowHour}:${nowMinute}`)
+            if (alarm.isEnable && isNow && isToday) {
                 startRing()
             }
         }, 1000 * 60)
     })
+}
+
+function getDayOfWeek() {
+    return new Date().getDay() + 6 % 7
 }
 
 
