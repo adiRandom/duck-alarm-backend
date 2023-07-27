@@ -19,7 +19,7 @@ admin.initializeApp({
 type Alarm = {
     hour: number;
     min: number;
-    isEnable: boolean;
+    isActive: boolean;
     repeatingDays: number[];
     isPm: boolean;
 }
@@ -124,6 +124,10 @@ async function playAndLoopSound() {
 }
 
 async function startRing() {
+    if(state.shouldRing){
+        return
+    }
+
     console.log("Starting ring")
     state.shouldRing = true;
 
@@ -202,7 +206,7 @@ function onCron() {
             const isNow = getHourIn24Format(alarm.hour, alarm.isPm) === nowHour && alarm.min === nowMinute;
             const isToday = alarm.repeatingDays.length === 0 || alarm.repeatingDays.includes(getDayOfWeek());
             console.log(`isNow: ${isNow}, isToday: ${isToday} time: ${nowHour}:${nowMinute}`)
-            if (alarm.isEnable && isNow && isToday) {
+            if (alarm.isActive && isNow && isToday) {
                 startRing()
             }
         })
