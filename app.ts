@@ -191,7 +191,6 @@ async function sendNotification() {
 function onCron() {
     // Check alarms every minute
     setInterval(() => {
-        console.log("Running cron")
         const now = new Date();
         const nowHour = now.getHours();
         const nowMinute = now.getMinutes();
