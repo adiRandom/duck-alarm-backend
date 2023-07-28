@@ -26,16 +26,19 @@ type Alarm = {
 
 type Metadata = {
     shouldRing: boolean;
+    canRing: boolean;
 }
 
 type State = {
     alarms: Alarm[];
     shouldRing: boolean;
+    canRing: boolean;
 }
 
 let state: State = {
     alarms: [],
-    shouldRing: false
+    shouldRing: false,
+    canRing: false
 }
 
 const deviceId = process.argv[2] || "-1";
@@ -85,6 +88,9 @@ function listenForRingStatus() {
         const document = querySnapshot.data() as Metadata;
         console.log(`Should ring: ${document.shouldRing}`)
         console.log(`Current state: ${state.shouldRing}`)
+
+        state.canRing = document.canRing;
+
         if (document.shouldRing) {
             if (!state.shouldRing) {
                 // Not ringing yet
@@ -124,7 +130,8 @@ async function playAndLoopSound() {
 }
 
 async function startRing() {
-    if(state.shouldRing){
+    // Already ringing or can't ring
+    if(state.shouldRing || !state.canRing){
         return
     }
 
